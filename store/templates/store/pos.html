@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}ขายของ · {{ shop_name }}{% endblock %}
+
+{% block body %}
+<div class="grid items-start gap-3 p-3 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(21rem,32%)]">
+
+  <!-- ============ ฝั่งซ้าย: เลือกสินค้า ============ -->
+  <div class="panel">
+    <input id="search" type="search" autocomplete="off"
+           placeholder="พิมพ์ชื่อสินค้า หรือยิงบาร์โค้ด…"
+           class="w-full min-h-19 px-4 py-2 mb-2 text-xl font-bold
+                  bg-white text-ink border-4 border-line rounded-2xl
+                  focus:outline-none focus:border-blue-700">
+
+    <div class="flex gap-2 min-w-0 overflow-x-auto pb-2">
+      <button class="cat cat-on" data-cat="fav">⭐ ขายบ่อย</button>
+      <button class="cat" data-cat="all">🗂 ทั้งหมด</button>
+      {% for c in categories %}
+        <button class="cat" data-cat="{{ c.id }}">{{ c.emoji }} {{ c.name }}</button>
+      {% endfor %}
+    </div>
+
+    <div id="grid"
+         class="grid gap-2 p-1 overflow-y-auto grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))]
+                lg:max-h-[calc(100vh-14rem)]"></div>
+  </div>
+
+  <!-- ============ ฝั่งขวา: บิล + คิดเงิน ============ -->
+  <div class="panel">
+    <div class="flex items-center justify-between mb-2 text-xl font-black">
+      <span>🧾 บิลนี้</span>
+      <span id="cartCount">0 ชิ้น</span>
+    </div>
+
+    <div id="cartList"
+         class="min-h-30 max-h-[38vh] overflow-y-auto py-1
+                border-y-3 border-dashed border-line"></div>
+
+    <div class="flex items-baseline justify-between my-2">
+      <span class="text-xl font-extrabold">รวมเป็นเงิน</span>
+      <span id="totalValue" class="text-5xl font-black tabular-nums text-green-700">0.00฿</span>
+    </div>
+
+    <!-- วิธีจ่ายเงิน -->
+    <div class="grid grid-cols-3 gap-2 mb-2">
+      <button class="btn mbtn btn-blue !text-lg !min-h-17" data-m="cash">💵 เงินสด</button>
+      <button class="btn mbtn !text-lg !min-h-17" data-m="transfer">📱 โอน</button>
+      <button class="btn mbtn !text-lg !min-h-17" data-m="credit">📒 ลงบัญชี</button>
+    </div>
+
+    <div id="customerRow" class="hidden mb-2">
+      <label>
+        <span class="fld-label">ลงบัญชีให้ใคร</span>
+        <select id="customerSelect" class="fld">
+          <option value="">— เลือกชื่อลูกค้า —</option>
+          {% for c in customers %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <!-- ปุ่มรับเงิน -->
+    <div class="grid grid-cols-3 gap-2">
+      <button class="btn btn-plain cash-btn !text-lg !min-h-17" data-v="20">20฿</button>
+      <button class="btn btn-plain cash-btn !text-lg !min-h-17" data-v="50">50฿</button>
+      <button class="btn btn-plain cash-btn !text-lg !min-h-17" data-v="100">100฿</button>
+      <button class="btn btn-plain cash-btn !text-lg !min-h-17" data-v="500">500฿</button>
+      <button class="btn btn-plain cash-btn !text-lg !min-h-17" data-v="1000">1000฿</button>
+      <button class="btn btn-plain cash-btn !text-lg !min-h-17" data-v="exact">✅ พอดี</button>
+    </div>
+
+    <div id="changeBox"
+         class="flex items-baseline justify-between gap-2 mt-2 px-4 py-2
+                bg-white border-4 border-line rounded-2xl">
+      <span>
+        <span class="text-lg font-extrabold">รับมา</span><br>
+        <span id="paidValue" class="text-xl font-black">ยังไม่รับเงิน</span>
+      </span>
+      <span class="text-right">
+        <span class="text-lg font-extrabold">เงินทอน</span><br>
+        <span id="changeValue" class="text-5xl font-black tabular-nums">-</span>
+      </span>
+    </div>
+
+    <div class="flex gap-2 mt-2">
+      <button class="btn btn-red basis-1/3 shrink-0" id="clearBtn">🗑 ยกเลิก</button>
+      <button class="btn btn-green btn-lg grow" id="payBtn" disabled>✅ เก็บเงิน</button>
+    </div>
+
+    <div class="mt-2 text-center text-base text-inksoft">
+      ยอดขายวันนี้ <b class="text-xl">{{ today_total|floatformat:2 }}฿</b>
+    </div>
+  </div>
+</div>
+
+<!-- ============ หน้าจอ "เรียบร้อย" ============ -->
+<div id="doneOverlay" hidden
+     class="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/70">
+  <div class="w-[min(35rem,96vw)] p-5 text-center bg-white rounded-[1.6rem] shadow-2xl">
+    <h2 class="mb-2 text-3xl font-extrabold">✅ <span id="doneMethod">เรียบร้อย</span></h2>
+
+    <div class="text-lg text-inksoft">ยอดรวม</div>
+    <div id="doneTotal" class="my-1 text-6xl font-black leading-tight">0฿</div>
+
+    <div id="doneChangeWrap">
+      <div class="text-lg text-inksoft">ทอนเงินให้ลูกค้า</div>
+      <div id="doneChange" class="my-1 text-6xl font-black leading-tight text-green-700">0฿</div>
+    </div>
+
+    <div class="flex gap-2 mt-4">
+      <a class="btn btn-plain grow" id="doneBillLink" href="#" target="_blank">🖨 ดูใบเสร็จ</a>
+      <button class="btn btn-green grow" id="doneNext">➡ ขายต่อ</button>
+    </div>
+  </div>
+</div>
+
+{{ products_json|json_script:"productData" }}
+{% endblock %}

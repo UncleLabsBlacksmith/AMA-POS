@@ -1,0 +1,40 @@
+{% load static %}<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ shop_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'store/tailwind.css' %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏪</text></svg>">
+</head>
+<body>
+
+<!-- จอเล็กเลื่อนแนวนอนแถวเดียว จอใหญ่ค่อยตัดบรรทัด เมนูจะได้ไม่กินพื้นที่ -->
+<div class="noprint sticky top-0 z-50 flex flex-nowrap overflow-x-auto md:flex-wrap
+            items-center gap-2 bg-zinc-800 text-white px-3 py-2 border-b-4 border-zinc-950">
+  <span class="shrink-0 mr-auto text-lg font-extrabold whitespace-nowrap">🏪 {{ shop_name }}</span>
+
+  {% url 'store:pos' as u_pos %}
+  {% url 'store:today' as u_today %}
+  {% url 'store:credit_list' as u_credit %}
+  {% url 'store:product_list' as u_prod %}
+  {% url 'store:history' as u_hist %}
+
+  <a class="navbtn {% if request.path == u_pos %}navbtn-on{% endif %}" href="{{ u_pos }}">🧾 ขายของ</a>
+  <a class="navbtn {% if request.path == u_today %}navbtn-on{% endif %}" href="{{ u_today }}">📊 ยอดวันนี้</a>
+  <a class="navbtn {% if request.path == u_credit %}navbtn-on{% endif %}" href="{{ u_credit }}">📒 ค้างจ่าย</a>
+  <a class="navbtn {% if request.path == u_prod %}navbtn-on{% endif %}" href="{{ u_prod }}">📦 สินค้า</a>
+  <a class="navbtn {% if request.path == u_hist %}navbtn-on{% endif %}" href="{{ u_hist }}">🕘 บิลย้อนหลัง</a>
+
+  <button class="navbtn" id="fontBtn" title="ปรับขนาดตัวหนังสือ">🔍 ตัวหนังสือ</button>
+  <button class="navbtn" id="voiceBtn" title="เปิด/ปิดเสียงพูด">🔊 เสียง</button>
+  <a class="navbtn bg-transparent" href="{% url 'store:help' %}">❓</a>
+  <span class="font-bold tabular-nums opacity-90" id="clock"></span>
+</div>
+
+{% block body %}{% endblock %}
+
+<script src="{% static 'store/pos.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

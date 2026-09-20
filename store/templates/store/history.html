@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}บิลย้อนหลัง · {{ shop_name }}{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto p-4">
+  <h1 class="mb-3 text-3xl font-extrabold">🕘 บิลย้อนหลัง</h1>
+
+  <div class="mb-3 px-4 py-3 text-base font-bold bg-amber-50 border-3 border-amber-500 rounded-2xl">
+    ถ้าคิดเงินผิด กดปุ่ม “ยกเลิกบิล” ได้ ของจะกลับเข้าสต๊อกให้เอง
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="tbl">
+      <tr><th>วันเวลา</th><th>ของที่ขาย</th><th>วิธีจ่าย</th><th class="num">ยอด</th><th></th></tr>
+      {% for s in sales %}
+        <tr class="{% if s.is_void %}opacity-50 line-through{% endif %}">
+          <td class="whitespace-nowrap">{{ s.created_at|date:"j M y H:i" }}</td>
+          <td>{% for i in s.items.all %}{{ i.emoji }}{{ i.name }}×{{ i.qty|floatformat:"-2" }} {% endfor %}</td>
+          <td>{{ s.get_payment_method_display }}{% if s.customer %}<br>{{ s.customer.name }}{% endif %}</td>
+          <td class="num">
+            <a class="text-blue-700 underline" href="{% url 'store:bill' s.pk %}">
+              {{ s.total|floatformat:2 }}฿</a>
+          </td>
+          <td>
+            {% if not s.is_void %}
+              <form method="post" action="{% url 'store:void_sale' s.pk %}"
+                    onsubmit="return confirm('ยกเลิกบิลนี้ ({{ s.total|floatformat:2 }}฿) ใช่ไหม?')">
+                {% csrf_token %}
+                <button class="btn btn-red">ยกเลิกบิล</button>
+              </form>
+            {% else %}
+              <span class="font-extrabold text-red-700">ยกเลิกแล้ว</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">— ยังไม่มีบิล —</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

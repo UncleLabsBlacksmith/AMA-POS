@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}ใบเสร็จ {{ sale.bill_no }}{% endblock %}
+
+{% block body %}
+<div class="receipt w-[min(26rem,96vw)] mx-auto my-4 p-5 text-base
+            bg-white border-3 border-dashed border-line rounded-xl">
+
+  <h1 class="mb-1 text-2xl font-extrabold text-center">{{ shop_name }}</h1>
+  {% if shop_phone %}<div class="text-center">โทร {{ shop_phone }}</div>{% endif %}
+  <div class="text-center">บิลเลขที่ {{ sale.bill_no }}</div>
+  <div class="text-center">{{ sale.created_at|date:"j M Y เวลา H:i" }}</div>
+
+  <div class="my-2 border-t-2 border-dashed border-line"></div>
+
+  {% for item in sale.items.all %}
+    <div class="flex justify-between gap-2 py-0.5">
+      <span>{{ item.emoji }} {{ item.name }}</span>
+      <span>{{ item.subtotal|floatformat:2 }}</span>
+    </div>
+    <div class="flex justify-between gap-2 py-0.5 text-sm text-inksoft">
+      <span>&nbsp;&nbsp;{{ item.qty|floatformat:"-2" }} × {{ item.price|floatformat:2 }}</span>
+      <span></span>
+    </div>
+  {% endfor %}
+
+  <div class="my-2 border-t-2 border-dashed border-line"></div>
+
+  <div class="flex justify-between gap-2 py-0.5 text-2xl font-black">
+    <span>รวม</span>
+    <span>{{ sale.total|floatformat:2 }}฿</span>
+  </div>
+
+  {% if sale.payment_method == 'cash' %}
+    <div class="flex justify-between gap-2 py-0.5">
+      <span>รับเงิน</span><span>{{ sale.paid|floatformat:2 }}฿</span>
+    </div>
+    <div class="flex justify-between gap-2 py-0.5 text-2xl font-black">
+      <span>เงินทอน</span><span>{{ sale.change|floatformat:2 }}฿</span>
+    </div>
+  {% else %}
+    <div class="flex justify-between gap-2 py-0.5">
+      <span>วิธีจ่าย</span><span>{{ sale.get_payment_method_display }}</span>
+    </div>
+    {% if sale.customer %}
+      <div class="flex justify-between gap-2 py-0.5">
+        <span>ลงบัญชีให้</span><span>{{ sale.customer.name }}</span>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {% if sale.is_void %}
+    <div class="my-2 border-t-2 border-dashed border-line"></div>
+    <div class="text-center font-black text-red-700">*** บิลนี้ถูกยกเลิกแล้ว ***</div>
+  {% endif %}
+
+  <div class="my-2 border-t-2 border-dashed border-line"></div>
+  <div class="text-center">ขอบคุณค่ะ 🙏</div>
+</div>
+
+<div class="noprint flex flex-wrap justify-center gap-2 pb-8">
+  <button class="btn btn-blue" onclick="window.print()">🖨 พิมพ์ใบเสร็จ</button>
+  <a class="btn btn-green" href="{% url 'store:pos' %}">➡ กลับไปขายของ</a>
+</div>
+{% endblock %}

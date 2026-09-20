@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}{{ customer.name }} · ค้างจ่าย{% endblock %}
+
+{% block body %}
+<div class="max-w-5xl mx-auto p-4">
+  <a class="btn btn-plain" href="{% url 'store:credit_list' %}">⬅ กลับ</a>
+
+  <h1 class="mt-3 text-3xl font-extrabold">📒 {{ customer.name }}</h1>
+  {% if customer.phone %}<div class="text-xl">โทร {{ customer.phone }}</div>{% endif %}
+
+  <div class="stat my-4 {% if balance > 0 %}bg-red-50 border-red-700{% else %}bg-green-50 border-green-700{% endif %}">
+    <div class="stat-lb">ยอดค้างชำระตอนนี้</div>
+    <div class="stat-vl text-5xl {% if balance > 0 %}text-red-700{% else %}text-green-700{% endif %}">
+      {{ balance|floatformat:2 }}฿
+    </div>
+  </div>
+
+  <h2 class="mb-2 text-2xl font-extrabold">💰 ลูกค้ามาจ่ายเงิน</h2>
+  <form method="post" action="{% url 'store:credit_pay' customer.pk %}" class="panel max-w-lg">
+    {% csrf_token %}
+    <label class="block mb-2">
+      <span class="fld-label">จ่ายมาเท่าไหร่ (บาท)</span>
+      <input name="amount" id="amt" inputmode="decimal" required placeholder="0" class="fld">
+    </label>
+    <div class="grid grid-cols-3 gap-2 mb-2">
+      <button type="button" class="btn btn-plain q !text-lg !min-h-17"
+              data-v="{{ balance|floatformat:2 }}">ทั้งหมด</button>
+      <button type="button" class="btn btn-plain q !text-lg !min-h-17" data-v="100">100฿</button>
+      <button type="button" class="btn btn-plain q !text-lg !min-h-17" data-v="500">500฿</button>
+    </div>
+    <button class="btn btn-green btn-lg w-full">✅ รับเงินแล้ว</button>
+  </form>
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">🧾 รายการที่ซื้อเชื่อไว้</h2>
+  <div class="overflow-x-auto">
+    <table class="tbl">
+      <tr><th>วันที่</th><th>ของที่ซื้อ</th><th class="num">ยอด</th></tr>
+      {% for s in sales %}
+        <tr>
+          <td class="whitespace-nowrap">{{ s.created_at|date:"j M y H:i" }}</td>
+          <td>{% for i in s.items.all %}{{ i.emoji }} {{ i.name }}×{{ i.qty|floatformat:"-2" }} {% endfor %}</td>
+          <td class="num">
+            <a class="text-blue-700 underline" href="{% url 'store:bill' s.pk %}">
+              {{ s.total|floatformat:2 }}฿</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">— ไม่มี —</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">💵 เงินที่จ่ายมาแล้ว</h2>
+  <div class="overflow-x-auto">
+    <table class="tbl">
+      <tr><th>วันที่</th><th>หมายเหตุ</th><th class="num">จ่าย</th></tr>
+      {% for p in payments %}
+        <tr>
+          <td class="whitespace-nowrap">{{ p.created_at|date:"j M y H:i" }}</td>
+          <td>{{ p.note|default:"—" }}</td>
+          <td class="num text-green-700">{{ p.amount|floatformat:2 }}฿</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">— ยังไม่เคยจ่าย —</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.q').forEach(b => b.addEventListener('click', () => {
+    document.getElementById('amt').value = b.dataset.v;
+  }));
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}ยอดวันนี้ · {{ shop_name }}{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto p-4">
+  <h1 class="mb-3 text-3xl font-extrabold">📊 ยอดขายวันนี้ ({{ date|date:"j F Y" }})</h1>
+
+  <div class="grid gap-3 grid-cols-[repeat(auto-fit,minmax(12rem,1fr))]">
+    <div class="stat bg-green-50 border-green-700">
+      <div class="stat-lb">ขายได้ทั้งหมด</div>
+      <div class="stat-vl text-green-700 text-5xl">{{ total|floatformat:2 }}฿</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lb">จำนวนบิล</div>
+      <div class="stat-vl">{{ count }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lb">💵 เงินสด</div>
+      <div class="stat-vl">{{ by_method.cash|floatformat:0 }}฿</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lb">📱 โอน</div>
+      <div class="stat-vl">{{ by_method.transfer|floatformat:0 }}฿</div>
+    </div>
+    <div class="stat {% if by_method.credit %}bg-red-50 border-red-700{% endif %}">
+      <div class="stat-lb">📒 ลงบัญชีไว้</div>
+      <div class="stat-vl {% if by_method.credit %}text-red-700{% endif %}">
+        {{ by_method.credit|floatformat:0 }}฿
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-2 my-4">
+    <button class="btn btn-blue" onclick="window.print()">🖨 พิมพ์สรุปวันนี้</button>
+    <button class="btn btn-plain noprint" id="readTotal">🔊 อ่านยอดให้ฟัง</button>
+  </div>
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">🏆 ของที่ขายดีวันนี้</h2>
+  {% if top_items %}
+    <table class="tbl">
+      <tr><th>สินค้า</th><th class="num">ขายไป</th></tr>
+      {% for it in top_items %}
+        <tr>
+          <td class="text-xl">{{ it.emoji }} {{ it.name }}</td>
+          <td class="num">{{ it.qty|floatformat:"-2" }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <div class="px-4 py-3 text-base font-bold bg-amber-50 border-3 border-amber-500 rounded-2xl">
+      วันนี้ยังไม่มีการขาย
+    </div>
+  {% endif %}
+
+  {% if low_stock %}
+    <h2 class="mt-6 mb-2 text-2xl font-extrabold">⚠️ ของใกล้หมด ต้องสั่งเพิ่ม</h2>
+    <table class="tbl">
+      <tr><th>สินค้า</th><th class="num">เหลือ</th></tr>
+      {% for p in low_stock %}
+        <tr>
+          <td class="text-xl">{{ p.emoji }} {{ p.name }}</td>
+          <td class="num text-red-700">{{ p.stock }} {{ p.unit }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">🧾 บิลวันนี้</h2>
+  <div class="overflow-x-auto">
+    <table class="tbl">
+      <tr><th>เวลา</th><th>รายการ</th><th>วิธีจ่าย</th><th class="num">ยอด</th></tr>
+      {% for s in sales %}
+        <tr>
+          <td>{{ s.created_at|date:"H:i" }}</td>
+          <td>{{ s.item_count|floatformat:"-2" }} ชิ้น</td>
+          <td>{{ s.get_payment_method_display }}</td>
+          <td class="num">
+            <a class="text-blue-700 underline" href="{% url 'store:bill' s.pk %}">
+              {{ s.total|floatformat:2 }}฿</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">— ยังไม่มีบิล —</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('readTotal').addEventListener('click', () => {
+    say('วันนี้ขายได้ {{ total|floatformat:0 }} บาท จาก {{ count }} บิล');
+  });
+</script>
+{% endblock %}

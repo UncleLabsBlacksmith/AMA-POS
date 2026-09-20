@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}วิธีใช้ · {{ shop_name }}{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto p-4">
+  <h1 class="mb-3 text-3xl font-extrabold">❓ วิธีใช้งาน (อ่านครั้งเดียวก็พอ)</h1>
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">1. ขายของ</h2>
+  <table class="tbl">
+    <tr><td class="text-3xl">1️⃣</td><td>กดที่รูปสินค้าทางซ้าย → ของจะไปอยู่ในบิลทางขวา</td></tr>
+    <tr><td class="text-3xl">2️⃣</td><td>ถ้าซื้อหลายชิ้น กดรูปซ้ำ หรือกดปุ่ม <b>+</b> ในบิล</td></tr>
+    <tr><td class="text-3xl">3️⃣</td><td>ลูกค้ายื่นเงินมา กดปุ่มใบละ <b>20 / 50 / 100 / 500 / 1000</b> ตามที่รับมา</td></tr>
+    <tr><td class="text-3xl">4️⃣</td><td>ดู <b>เงินทอน</b> ตัวใหญ่สีเขียว แล้วทอนให้ลูกค้า</td></tr>
+    <tr><td class="text-3xl">5️⃣</td><td>กดปุ่มเขียว <b>✅ เก็บเงิน</b> → เสร็จ</td></tr>
+  </table>
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">2. ถ้ากดผิด</h2>
+  <table class="tbl">
+    <tr><td class="text-3xl">🗑</td><td>ปุ่มถังขยะเล็กในบิล = เอาของชิ้นนั้นออก</td></tr>
+    <tr><td class="text-3xl">🗑</td><td>ปุ่มแดง <b>ยกเลิก</b> = ล้างบิลทั้งใบ เริ่มใหม่</td></tr>
+    <tr><td class="text-3xl">🕘</td><td>บิลที่เก็บเงินไปแล้ว ยกเลิกได้ที่หน้า <b>บิลย้อนหลัง</b></td></tr>
+  </table>
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">3. ลูกค้าขอติดไว้ก่อน (ซื้อเชื่อ)</h2>
+  <table class="tbl">
+    <tr><td class="text-3xl">📒</td><td>กดปุ่ม <b>ลงบัญชี</b> ก่อนเก็บเงิน แล้วเลือกชื่อลูกค้า</td></tr>
+    <tr><td class="text-3xl">💰</td><td>วันที่เขามาจ่าย เข้าหน้า <b>ค้างจ่าย</b> → เลือกชื่อ → ใส่เงินที่จ่ายมา</td></tr>
+  </table>
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">4. ปุ่มช่วยมองเห็น</h2>
+  <table class="tbl">
+    <tr><td class="text-3xl">🔍</td><td><b>ตัวหนังสือ</b> — กดเพื่อขยายทั้งหน้าให้ใหญ่ขึ้น (มี 4 ขนาด กดวนไปเรื่อยๆ)</td></tr>
+    <tr><td class="text-3xl">🔊</td><td><b>เสียง</b> — เปิดไว้ เครื่องจะพูดชื่อของ ราคา และเงินทอนให้ฟัง</td></tr>
+  </table>
+
+  <div class="mt-6">
+    <a class="btn btn-green btn-lg" href="{% url 'store:pos' %}">➡ กลับไปขายของ</a>
+  </div>
+</div>
+{% endblock %}

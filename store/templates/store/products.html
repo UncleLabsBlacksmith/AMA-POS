@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}สินค้า · {{ shop_name }}{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto p-4">
+  <h1 class="mb-3 text-3xl font-extrabold">📦 สินค้าในร้าน</h1>
+
+  <div class="mb-3 px-4 py-3 text-base font-bold bg-amber-50 border-3 border-amber-500 rounded-2xl">
+    ⭐ = สินค้าที่ขึ้นหน้าแรกให้กดง่าย · แก้ราคาแล้วกด 💾 บันทึก ได้เลย
+  </div>
+
+  <button class="btn btn-green btn-lg" id="newBtn">➕ เพิ่มสินค้าใหม่</button>
+
+  <!-- ฟอร์มเพิ่ม/แก้สินค้า -->
+  <form method="post" action="{% url 'store:product_save' %}" enctype="multipart/form-data"
+        class="panel hidden max-w-xl mt-4" id="form">
+    {% csrf_token %}
+    <input type="hidden" name="id" id="f_id">
+    <h2 class="mb-3 text-2xl font-extrabold" id="formTitle">➕ สินค้าใหม่</h2>
+
+    <label class="block mb-2"><span class="fld-label">ชื่อสินค้า</span>
+      <input name="name" id="f_name" required placeholder="เช่น น้ำเปล่า" class="fld"></label>
+
+    <label class="block mb-2"><span class="fld-label">ราคาขาย (บาท)</span>
+      <input name="price" id="f_price" inputmode="decimal" required placeholder="10" class="fld"></label>
+
+    <label class="block mb-2"><span class="fld-label">รูปสัญลักษณ์ (อิโมจิ) — ช่วยให้จำง่าย</span>
+      <input name="emoji" id="f_emoji" value="🛒" placeholder="🥤" class="fld"></label>
+
+    <label class="block mb-2"><span class="fld-label">หมวด</span>
+      <select name="category" id="f_cat" class="fld">
+        <option value="">— ไม่ระบุ —</option>
+        {% for c in categories %}<option value="{{ c.id }}">{{ c.emoji }} {{ c.name }}</option>{% endfor %}
+      </select></label>
+
+    <label class="block mb-2"><span class="fld-label">หน่วยนับ</span>
+      <input name="unit" id="f_unit" value="ชิ้น" class="fld"></label>
+
+    <label class="block mb-2"><span class="fld-label">จำนวนคงเหลือ</span>
+      <input name="stock" id="f_stock" inputmode="numeric" value="0" class="fld"></label>
+
+    <label class="block mb-2"><span class="fld-label">บาร์โค้ด (ยิงเครื่องสแกนลงช่องนี้ได้เลย)</span>
+      <input name="barcode" id="f_barcode" class="fld"></label>
+
+    <label class="block mb-2"><span class="fld-label">รูปสินค้า (ไม่ใส่ก็ได้)</span>
+      <input type="file" name="image" accept="image/*" class="fld pt-3"></label>
+
+    <label class="flex items-center gap-3 mb-3">
+      <input type="checkbox" name="is_favorite" id="f_fav" class="w-10 h-10 accent-blue-700">
+      <span class="text-base font-extrabold">⭐ ให้ขึ้นหน้าแรก (ของที่ขายบ่อย)</span>
+    </label>
+
+    <div class="flex gap-2">
+      <button type="button" class="btn btn-plain basis-1/3 shrink-0" id="cancelBtn">ยกเลิก</button>
+      <button class="btn btn-green grow">💾 บันทึก</button>
+    </div>
+  </form>
+
+  <div class="overflow-x-auto mt-4">
+    <table class="tbl">
+      <tr><th></th><th>ชื่อสินค้า</th><th class="num">ราคา</th><th class="num">คงเหลือ</th><th></th></tr>
+      {% for p in products %}
+        <tr>
+          <td class="text-3xl whitespace-nowrap">{% if p.is_favorite %}⭐{% endif %}{{ p.emoji }}</td>
+          <td class="text-xl font-extrabold">{{ p.name }}
+            <div class="text-sm font-normal text-inksoft">{{ p.category|default:"" }}</div>
+          </td>
+          <td class="num">{{ p.price|floatformat:2 }}฿</td>
+          <td class="num {% if p.is_low_stock %}text-red-700{% endif %}">{{ p.stock }} {{ p.unit }}</td>
+          <td>
+            <div class="flex gap-1">
+              <button class="btn btn-plain edit"
+                      data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}"
+                      data-emoji="{{ p.emoji }}" data-cat="{{ p.category_id|default:'' }}"
+                      data-unit="{{ p.unit }}" data-stock="{{ p.stock }}"
+                      data-barcode="{{ p.barcode }}" data-fav="{{ p.is_favorite|yesno:'1,' }}">✏️ แก้ไข</button>
+
+              <form method="post" action="{% url 'store:product_restock' p.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="amount" value="12">
+                <button class="btn btn-plain" title="เติมของเข้าสต๊อก 12 ชิ้น">➕12</button>
+              </form>
+
+              <form method="post" action="{% url 'store:product_delete' p.pk %}"
+                    onsubmit="return confirm('เอา {{ p.name }} ออกจากร้านใช่ไหม?')">
+                {% csrf_token %}
+                <button class="btn btn-red">🗑</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">— ยังไม่มีสินค้า กดปุ่ม “เพิ่มสินค้าใหม่” ด้านบน —</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById('form');
+  const show = () => { form.classList.remove('hidden'); form.scrollIntoView({ behavior: 'smooth' }); };
+
+  document.getElementById('newBtn').addEventListener('click', () => {
+    form.reset();
+    document.getElementById('f_id').value = '';
+    document.getElementById('f_emoji').value = '🛒';
+    document.getElementById('formTitle').textContent = '➕ สินค้าใหม่';
+    show();
+  });
+
+  document.getElementById('cancelBtn').addEventListener('click', () => {
+    form.classList.add('hidden');
+  });
+
+  document.querySelectorAll('.edit').forEach(b => b.addEventListener('click', () => {
+    const d = b.dataset;
+    document.getElementById('f_id').value = d.id;
+    document.getElementById('f_name').value = d.name;
+    document.getElementById('f_price').value = d.price;
+    document.getElementById('f_emoji').value = d.emoji;
+    document.getElementById('f_cat').value = d.cat || '';
+    document.getElementById('f_unit').value = d.unit;
+    document.getElementById('f_stock').value = d.stock;
+    document.getElementById('f_barcode').value = d.barcode;
+    document.getElementById('f_fav').checked = d.fav === '1';
+    document.getElementById('formTitle').textContent = '✏️ แก้ไข ' + d.name;
+    show();
+  }));
+</script>
+{% endblock %}

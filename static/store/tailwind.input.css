@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/* บอก Tailwind ว่าให้ไปอ่านคลาสจากไฟล์ไหนบ้าง */
+@source "../../templates";
+@source "../../store/templates";
+@source "./pos.js";
+
+/* ============================================================
+   ชุดสีและฟอนต์ของร้าน
+   ============================================================ */
+@theme {
+  --color-paper:   #f7f4ed;   /* พื้นหลังสีกระดาษ สบายตากว่าสีขาวจ้า */
+  --color-ink:     #16120c;   /* ตัวหนังสือ เกือบดำสนิท เพื่อความคมชัดสูงสุด */
+  --color-inksoft: #4a4238;
+  --color-line:    #d6cfc1;   /* เส้นขอบ */
+
+  --font-thai: 'Leelawadee UI', 'Noto Sans Thai', 'Sarabun', Tahoma, sans-serif;
+}
+
+/* ============================================================
+   ขนาดตัวหนังสือฐาน — ปุ่ม 🔍 จะมาแก้ค่านี้
+   ทุกอย่างใน Tailwind วัดเป็น rem ดังนั้นพอฐานใหญ่ขึ้น
+   ปุ่ม ระยะห่าง และตัวหนังสือ จะใหญ่ขึ้นตามกันหมดทั้งหน้า
+   ============================================================ */
+@layer base {
+  html {
+    font-size: var(--pos-font, 21px);
+  }
+  body {
+    @apply bg-paper text-ink font-thai antialiased;
+  }
+}
+
+/* ============================================================
+   คลาสที่ใช้ซ้ำบ่อย — ปุ่มใหญ่ กดง่าย สำหรับผู้สูงอายุ
+   ============================================================ */
+@layer components {
+
+  /* ---- ปุ่มมาตรฐาน: สูงอย่างน้อย 19 หน่วย (= 4.75rem) ---- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 cursor-pointer
+           min-h-19 px-5 py-2 text-lg font-extrabold no-underline
+           rounded-2xl border-4 border-transparent bg-zinc-200 text-ink
+           transition-transform duration-75 active:scale-95
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-green { @apply bg-green-700 border-green-900 text-white; }
+  .btn-red   { @apply bg-red-700   border-red-900   text-white; }
+  .btn-blue  { @apply bg-blue-700  border-blue-900  text-white; }
+  .btn-plain { @apply bg-white     border-line; }
+  .btn-lg    { @apply text-2xl min-h-23; }
+
+  /* ---- ปุ่มบนแถบเมนู ---- */
+  .navbtn {
+    @apply inline-flex shrink-0 items-center gap-1 cursor-pointer no-underline
+           whitespace-nowrap min-h-14 px-3 py-1 text-base font-bold
+           rounded-xl border-3 border-zinc-600 bg-zinc-700 text-white
+           hover:bg-zinc-600;
+  }
+  .navbtn-on { @apply bg-blue-700 border-blue-300; }
+
+  /* ---- ปุ่มเลือกหมวดสินค้า ---- */
+  .cat {
+    @apply shrink-0 cursor-pointer whitespace-nowrap
+           min-h-15 px-4 py-1 text-base font-extrabold
+           bg-white text-ink border-3 border-line rounded-full;
+  }
+  .cat-on { @apply bg-blue-700 border-blue-900 text-white; }
+
+  /* ---- กล่องเนื้อหา ---- */
+  .panel {
+    @apply min-w-0 bg-white border-3 border-line rounded-3xl p-3;
+  }
+
+  /* ---- ปุ่มสินค้าในหน้าขาย ---- */
+  .tile {
+    @apply flex flex-col items-center justify-center gap-0.5 cursor-pointer text-center
+           min-h-38 p-2 bg-white text-ink
+           border-4 border-line rounded-3xl
+           transition-transform duration-75 active:scale-95;
+  }
+  .tile-pinned { @apply border-amber-500 bg-amber-50; }
+
+  /* ---- ปุ่มเพิ่ม/ลดจำนวนในบิล ---- */
+  .qbtn {
+    @apply w-12 h-12 text-2xl font-black cursor-pointer
+           bg-white text-ink border-3 border-line rounded-xl;
+  }
+  .qbtn-del { @apply bg-red-100 border-red-300 text-red-700; }
+
+  /* ---- ช่องกรอกข้อมูล ---- */
+  .fld {
+    @apply w-full min-h-16 px-4 py-1 text-xl font-bold
+           bg-white text-ink border-3 border-line rounded-2xl
+           focus:outline-none focus:border-blue-700;
+  }
+  .fld-label { @apply block text-base font-extrabold mb-1; }
+
+  /* ---- ตาราง ---- */
+  .tbl {
+    @apply w-full border-separate border-spacing-0
+           bg-white border-3 border-line rounded-2xl overflow-hidden;
+  }
+  .tbl th {
+    @apply px-3 py-2 text-left text-base font-extrabold
+           bg-stone-100 border-b-2 border-stone-200;
+  }
+  .tbl td {
+    @apply px-3 py-2 text-left text-base border-b-2 border-stone-100;
+  }
+  .tbl .num { @apply text-right font-extrabold tabular-nums; }
+
+  /* ---- การ์ดสรุปตัวเลข ---- */
+  .stat {
+    @apply bg-white border-4 border-line rounded-3xl px-4 py-3 text-center;
+  }
+  .stat-lb { @apply text-base font-bold text-inksoft; }
+  .stat-vl { @apply text-4xl font-black tabular-nums break-words; }
+}
+
+/* ============================================================
+   ใบเสร็จ + การสั่งพิมพ์
+   ============================================================ */
+@media print {
+  .noprint { display: none !important; }
+  body { background: #fff; }
+  .receipt { border: none !important; margin: 0 !important; width: auto !important; }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "pos-amah",
+  "version": "1.0.0",
+  "description": "ระบบ POS ร้านชำอาม่า - ส่วนของ Tailwind CSS",
+  "scripts": {
+    "build": "tailwindcss -i static/store/tailwind.input.css -o static/store/tailwind.css --minify",
+    "watch": "tailwindcss -i static/store/tailwind.input.css -o static/store/tailwind.css --watch"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "private": true
+}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}ค้างจ่าย · {{ shop_name }}{% endblock %}
+
+{% block body %}
+<div class="max-w-5xl mx-auto p-4">
+  <h1 class="mb-3 text-3xl font-extrabold">📒 สมุดลูกค้าค้างจ่าย</h1>
+
+  <div class="stat mb-4 {% if grand_total %}bg-red-50 border-red-700{% else %}bg-green-50 border-green-700{% endif %}">
+    <div class="stat-lb">ยอดค้างทั้งหมด</div>
+    <div class="stat-vl text-5xl {% if grand_total %}text-red-700{% else %}text-green-700{% endif %}">
+      {{ grand_total|floatformat:2 }}฿
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="tbl">
+      <tr><th>ชื่อลูกค้า</th><th>เบอร์โทร</th><th class="num">ค้างอยู่</th><th></th></tr>
+      {% for r in rows %}
+        <tr>
+          <td class="text-xl font-extrabold">{{ r.c.name }}</td>
+          <td>{{ r.c.phone|default:"—" }}</td>
+          <td class="num text-xl {% if r.balance > 0 %}text-red-700{% else %}text-green-700{% endif %}">
+            {{ r.balance|floatformat:2 }}฿
+          </td>
+          <td><a class="btn btn-plain" href="{% url 'store:credit_detail' r.c.pk %}">ดู / รับเงิน</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">— ยังไม่มีลูกค้าค้างจ่าย —</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <h2 class="mt-6 mb-2 text-2xl font-extrabold">➕ เพิ่มชื่อลูกค้าใหม่</h2>
+  <form method="post" action="{% url 'store:customer_add' %}" class="panel max-w-lg">
+    {% csrf_token %}
+    <label class="block mb-2">
+      <span class="fld-label">ชื่อลูกค้า</span>
+      <input name="name" required placeholder="เช่น ป้าสมศรี" class="fld">
+    </label>
+    <label class="block mb-2">
+      <span class="fld-label">เบอร์โทร (ไม่ใส่ก็ได้)</span>
+      <input name="phone" inputmode="tel" class="fld">
+    </label>
+    <button class="btn btn-green w-full">💾 บันทึกชื่อ</button>
+  </form>
+</div>
+{% endblock %}
